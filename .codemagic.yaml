@@ -1,0 +1,86 @@
+workflows:
+  flutter-build:
+    name: Flutter Build
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        PACKAGE_NAME: "com.example.jarvis_mobile_app"
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Flutter build ipa
+        script: |
+          flutter build ipa --release
+      - name: Flutter build apk
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - kurushi9000@gmail.com
+      scripts:
+        - name: Deploy to Firebase App Distribution
+          script: |
+            # firebase appdistribution:distribute "build/app/outputs/flutter-apk/app-release.apk" \
+            #   --app $FIREBASE_APP_ID_ANDROID \
+            #   --groups "testers" \
+            #   --release-notes "Build $CM_BUILD_NUMBER"
+            echo "Deploy to Firebase App Distribution"
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+      google_play:
+        track: internal
+        submit_as_draft: true
+
+  flutter-test:
+    name: Flutter Test
+    environment:
+      flutter: stable
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        script: |
+          flutter test
+      - name: Run integration tests
+        script: |
+          flutter test integration_test
+    artifacts:
+      - test_driver/screenshots
+      - flutter_drive.log
+
+  flutter-analyze:
+    name: Flutter Analyze
+    environment:
+      flutter: stable
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Analyze code
+        script: |
+          flutter analyze
+      - name: Run lints
+        script: |
+          flutter pub run flutter_lints:lint
