@@ -32,7 +32,7 @@ dependencies:
   # Authentication
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^6.0.4
-  flutter_github_auth: ^0.0.4
+  flutter_web_auth: ^0.5.0
   flutter_secure_storage: ^9.0.0
   
   # Audio & Voice
