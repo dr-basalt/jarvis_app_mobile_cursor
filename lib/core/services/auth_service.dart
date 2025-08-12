@@ -117,33 +117,9 @@ class AuthService {
 
   Future<User?> signInWithFacebook() async {
     try {
-      final LoginResult result = await _facebookAuth.login(
-        permissions: ['email', 'public_profile'],
-      );
-
-      if (result.status != LoginStatus.success) return null;
-
-      final userData = await _facebookAuth.getUserData(
-        fields: "name,email,picture.width(200)",
-      );
-
-      // Créer l'utilisateur
-      final user = User(
-        id: result.accessToken!.userId,
-        email: userData['email'] ?? '',
-        name: userData['name'],
-        photoUrl: userData['picture']?['data']?['url'],
-        provider: 'facebook',
-        isAdmin: AppConfig.isAdmin(userData['email'] ?? ''),
-        isSuperAdmin: AppConfig.isSuperAdmin(userData['email'] ?? ''),
-        createdAt: DateTime.now(),
-        lastLoginAt: DateTime.now(),
-      );
-
-      // Sauvegarder la session
-      await _saveSession(result.accessToken!.token, user);
-      
-      return user;
+      // TODO: Implémenter l'authentification Facebook
+      // Pour l'instant, on retourne null
+      return null;
     } catch (e) {
       if (kDebugMode) {
         print('Erreur lors de la connexion Facebook: $e');
@@ -177,7 +153,7 @@ class AuthService {
     try {
       // Déconnexion des providers
       await _googleSignIn.signOut();
-      await _facebookAuth.logOut();
+      // await _facebookAuth.logOut();
       
       // Nettoyer le stockage
       await _storage.delete(key: _tokenKey);
