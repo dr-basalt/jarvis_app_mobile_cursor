@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'screens/chat_screen.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'services/auth_service.dart';
 import 'providers/chat_provider.dart';
+import 'theme/app_theme.dart';
+import 'screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialiser Hive
+  await Hive.initFlutter();
+  
   runApp(const JarvisApp());
 }
 
@@ -13,30 +20,24 @@ class JarvisApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ChatProvider(),
-      child: MaterialApp(
-        title: 'Jarvis - Assistant IA',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF1E3A8A),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          textTheme: GoogleFonts.interTextTheme(),
-          appBarTheme: AppBarTheme(
-            backgroundColor: const Color(0xFF1E3A8A),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            titleTextStyle: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        home: const ChatScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthService()),
+        ChangeNotifierProvider(create: (context) => ChatProvider()),
+      ],
+      child: Consumer<AuthService>(
+        builder: (context, authService, child) {
+          return MaterialApp(
+            title: 'Jarvis - Assistant IA',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: authService.config?.isDarkMode == true 
+              ? ThemeMode.dark 
+              : ThemeMode.light,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }
