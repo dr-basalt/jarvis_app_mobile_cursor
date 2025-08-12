@@ -1,57 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:jarvis_mobile_app/config/app_config.dart';
-import 'package:jarvis_mobile_app/config/theme.dart';
-import 'package:jarvis_mobile_app/core/providers/providers.dart';
-import 'package:jarvis_mobile_app/core/router/app_router.dart';
-import 'package:jarvis_mobile_app/core/services/notification_service.dart';
-import 'package:jarvis_mobile_app/core/services/storage_service.dart';
+import 'screens/chat_screen.dart';
+import 'providers/chat_provider.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialisation Hive
-  await Hive.initFlutter();
-  await StorageService.initialize();
-  
-  // Initialisation notifications
-  await NotificationService.initialize();
-  
-  // Configuration app
-  await AppConfig.initialize();
-  
-  runApp(
-    const ProviderScope(
-      child: JarvisApp(),
-    ),
-  );
+void main() {
+  runApp(const JarvisApp());
 }
 
-class JarvisApp extends ConsumerWidget {
+class JarvisApp extends StatelessWidget {
   const JarvisApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
-    final themeMode = ref.watch(themeModeProvider);
-    
-    return MaterialApp.router(
-      title: 'Jarvis Assistant IA',
-      debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      routerConfig: router,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: const TextScaler.linear(1.0),
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => ChatProvider(),
+      child: MaterialApp(
+        title: 'Jarvis - Assistant IA',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1E3A8A),
+            brightness: Brightness.light,
           ),
-          child: child!,
-        );
-      },
+          useMaterial3: true,
+          textTheme: GoogleFonts.interTextTheme(),
+          appBarTheme: AppBarTheme(
+            backgroundColor: const Color(0xFF1E3A8A),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            titleTextStyle: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        home: const ChatScreen(),
+      ),
     );
   }
 }
